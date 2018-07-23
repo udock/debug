@@ -1,0 +1,14 @@
+{
+  "name": "@udock/debug",
+  "version": "0.0.1",
+  "description": "@udock/debug",
+  "private": true,
+  "main": "index.js",
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "chalk": "^2.1.0",
+    "enhanced-resolve": "^3.4.1"
+  }
+}
