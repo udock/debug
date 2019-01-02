@@ -1,10 +1,8 @@
 'use strict'
+const _ = require('lodash')
 const path = require('path')
 const Module = require('module')
-
-function concat (target, data) {
-  target.splice.apply(target, [target.length, 0].concat(data))
-}
+const WebpackChain = require('webpack-chain')
 
 const projectNodeModulesPath = path.resolve(__dirname, '../..')
 const alias = require('./lib/debug').alias
@@ -69,7 +67,7 @@ module.exports = {
       return debug
     }
   },
-  setup: (config, pluginTasks) => {
+  setup: (webpackConfig, pluginTasks) => {
     let alias
 
     const updateAlias = () => {
@@ -83,63 +81,48 @@ module.exports = {
     }
 
     updateAlias()
+
     pluginTasks.push((compiler) => {
       compiler.plugin('compile', updateAlias)
     })
 
-    const isInAlias = (req) => {
-      for (let item of alias) {
-        if (req.startsWith(item)) {
-          return true
+    const DynamicAliasPlugin = require.resolve('./lib/dynamicAliasPlugin')
+    const eslintConfigFile = path.resolve('./.eslintrc.js')
+    if (webpackConfig instanceof WebpackChain) {
+      webpackConfig.module.rule('eslint')
+        .use('eslint-loader')
+        .tap(options => {
+          // 明确指定 eslint 配置文件路径
+          options.configFile = eslintConfigFile
+          return options
+        })
+
+      // 关闭 resolve 缓存
+      webpackConfig.resolve
+        .unsafeCache(false)
+        .modules// 配置 modules 查找顺序
+        .add(projectNodeModulesPath)
+        .add('./node_modules').end()
+        .plugin('dynamic-alias-plugin')
+        .use(DynamicAliasPlugin)
+    } else {
+      (_.get(webpackConfig, 'module.rules') || []).forEach(function (rule) {
+        if (rule.loader === 'eslint-loader') {
+          _.set(rule, 'options.configFile', eslintConfigFile)
         }
-      }
-      return false
+      })
+
+      // 关闭 resolve 缓存
+      webpackConfig.resolve.unsafeCache = false
+
+      // 配置 modules 查找顺序
+      webpackConfig.resolve.modules = webpackConfig.resolve.modules || []
+      webpackConfig.resolve.modules.unshift('./node_modules')
+      webpackConfig.resolve.modules.unshift(projectNodeModulesPath)
+
+      // 注入 webpack 插件
+      webpackConfig.resolve.plugins = webpackConfig.resolve.plugins || []
+      webpackConfig.resolve.plugins.unshift(new (require(DynamicAliasPlugin))())
     }
-
-    // 关闭 resolve 缓存
-    config.resolve.unsafeCache = false
-
-    // 注入 webpack 插件
-    config.resolve.plugins = config.resolve.plugins || []
-    config.resolve.plugins.unshift(new (require('./lib/dynamicAliasPlugin'))())
-
-    // 配置 modules 查找顺序
-    config.resolve.modules = config.resolve.modules || ['./node_modules']
-    config.resolve.modules.unshift(projectNodeModulesPath)
-
-    const rules = config.module.rules
-
-    rules.forEach(function (rule) {
-      if (rule.loader === 'vue-loader') {
-        rule.exclude = (rule.exclude || []).concat(isInAlias)
-      }
-    })
-    const babelLoaderOptions = {
-      babelrc: false,
-      presets: [[require.resolve('babel-preset-env'), {modules: false}], require.resolve('babel-preset-stage-2')],
-      plugins: [require.resolve('babel-plugin-transform-runtime')],
-      comments: false
-    }
-    concat(rules, [
-      {
-        test: /\.js$/,
-        loader: 'babel-loader',
-        include: isInAlias,
-        options: babelLoaderOptions
-      },
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader',
-        include: isInAlias,
-        options: {
-          loaders: {
-            js: {
-              loader: require.resolve('babel-loader'),
-              options: babelLoaderOptions
-            }
-          }
-        }
-      }
-    ])
   }
 }

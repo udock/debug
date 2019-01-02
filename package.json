@@ -2,13 +2,16 @@
   "name": "@udock/debug",
   "version": "0.0.1",
   "description": "@udock/debug",
-  "private": true,
   "main": "index.js",
   "files": [
-    "lib"
+    "lib",
+    "index.js"
   ],
   "dependencies": {
     "chalk": "^2.1.0",
-    "enhanced-resolve": "^3.4.1"
-  }
+    "enhanced-resolve": "^3.4.1",
+    "lodash": "^4.17.11",
+    "webpack-chain": "^5.0.1"
+  },
+  "license": "MIT"
 }
