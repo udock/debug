@@ -2,7 +2,6 @@
 const _ = require('lodash')
 const path = require('path')
 const Module = require('module')
-const WebpackChain = require('webpack-chain')
 
 const projectNodeModulesPath = path.resolve(__dirname, '../..')
 const alias = require('./lib/debug').alias
@@ -88,7 +87,7 @@ module.exports = {
 
     const DynamicAliasPlugin = require.resolve('./lib/dynamicAliasPlugin')
     const eslintConfigFile = path.resolve('./.eslintrc.js')
-    if (webpackConfig instanceof WebpackChain) {
+    if (_.isFunction(_.get(webpackConfig, 'toConfig'))) {
       webpackConfig.module.rule('eslint')
         .use('eslint-loader')
         .tap(options => {

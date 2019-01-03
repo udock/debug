@@ -10,8 +10,7 @@
   "dependencies": {
     "chalk": "^2.1.0",
     "enhanced-resolve": "^3.4.1",
-    "lodash": "^4.17.11",
-    "webpack-chain": "^5.0.1"
+    "lodash": "^4.17.4"
   },
   "license": "MIT"
 }
