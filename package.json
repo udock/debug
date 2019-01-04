@@ -1,6 +1,6 @@
 {
   "name": "@udock/debug",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "@udock/debug",
   "main": "index.js",
   "files": [
