@@ -88,14 +88,6 @@ module.exports = {
     const DynamicAliasPlugin = require.resolve('./lib/dynamicAliasPlugin')
     const eslintConfigFile = path.resolve('./.eslintrc.js')
     if (_.isFunction(_.get(webpackConfig, 'toConfig'))) {
-      webpackConfig.module.rule('eslint')
-        .use('eslint-loader')
-        .tap(options => {
-          // 明确指定 eslint 配置文件路径
-          options.configFile = eslintConfigFile
-          return options
-        })
-
       // 关闭 resolve 缓存
       webpackConfig.resolve
         .unsafeCache(false)
@@ -104,6 +96,17 @@ module.exports = {
         .add('./node_modules').end()
         .plugin('dynamic-alias-plugin')
         .use(DynamicAliasPlugin)
+
+      process.nextTick(() => {
+        webpackConfig.module.rule('eslint')
+          .use('eslint-loader')
+          .tap(options => {
+            // 明确指定 eslint 配置文件路径
+            // options = options || {}
+            options.configFile = eslintConfigFile
+            return options
+          })
+      })
     } else {
       (_.get(webpackConfig, 'module.rules') || []).forEach(function (rule) {
         if (rule.loader === 'eslint-loader') {
