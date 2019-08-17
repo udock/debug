@@ -1,6 +1,6 @@
 {
   "name": "@udock/debug",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "@udock/debug",
   "main": "index.js",
   "files": [
@@ -8,9 +8,15 @@
     "index.js"
   ],
   "dependencies": {
-    "chalk": "^2.1.0",
-    "enhanced-resolve": "^3.4.1",
+    "chalk": "^2.4.2",
     "lodash": "^4.17.4"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/lodash": "^4.14.137",
+    "@types/node": "^12.7.2",
+    "@types/webpack": "^4.32.2",
+    "webpack-chain": "^6.0.0"
+  }
 }
