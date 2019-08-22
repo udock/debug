@@ -69,14 +69,14 @@ module.exports = {
         }
     },
     setup: function (webpackConfig, pluginTasks) {
-        var alias;
+        var eslintExcludes = [];
         var updateAlias = function () {
-            alias = [];
+            eslintExcludes = [];
             delete require.cache[require.resolve('./lib/debug')];
-            var debug = require('./lib/debug');
-            for (var item in debug.alias) {
-                var aliasPath = debug.alias[item].path;
-                alias.push(path_1.default.join(aliasPath, 'src'));
+            alias = require('./lib/debug').alias;
+            for (var key in alias) {
+                if (!alias[key].eslint)
+                    eslintExcludes.push(alias[key].path);
             }
         };
         updateAlias();
@@ -94,6 +94,14 @@ module.exports = {
                 .add('./node_modules').end()
                 .plugin('dynamic-alias-plugin')
                 .use(DynamicAliasPlugin);
+            webpackConfig.module.rule('eslint').exclude.add(function (path) {
+                for (var _i = 0, eslintExcludes_1 = eslintExcludes; _i < eslintExcludes_1.length; _i++) {
+                    var item = eslintExcludes_1[_i];
+                    if (path.startsWith(item))
+                        return true;
+                }
+                return false;
+            });
             process.nextTick(function () {
                 webpackConfig.module.rule('eslint')
                     .use('eslint-loader')

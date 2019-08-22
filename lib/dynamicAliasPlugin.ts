@@ -54,14 +54,14 @@ module.exports = function (options: any): webpack.ResolvePlugin {
 }
 
 // 延时输出日志
-let msg = ''
+let msgBuffer = ''
 const logDelay = _.debounce(() => {
-  console.log(msg)
-  msg = ''
+  console.log(msgBuffer)
+  msgBuffer = ''
 }, 1000)
 
 function log (msg: string) {
-  msg += `${msg}\n`
+  msgBuffer += `${msg}\n`
   logDelay()
 }
 

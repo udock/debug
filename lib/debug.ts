@@ -18,10 +18,11 @@ try {
       }
       const aliasPath = item[0]
       const mainPath = item[1] === true ? 'src/main' : item[1]
-      return {
+      const options = item[2] || { eslint: true }
+      return _.extend({}, options, {
         path: aliasPath,
         main: mainPath ? `/${mainPath.replace(/^\//, '')}` : undefined
-      }
+      })
     })
   }
 } catch (e) {}

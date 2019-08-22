@@ -6,7 +6,7 @@ import Config from 'webpack-chain'
 import webpack = require('webpack');
 
 const projectNodeModulesPath = path.resolve(__dirname, '../..')
-const alias = require('./lib/debug').alias
+let alias = require('./lib/debug').alias
 const ModuleRef = Module as any as { _resolveLookupPaths: any }
 const originalResolveLookupPaths = ModuleRef._resolveLookupPaths
 
@@ -71,15 +71,14 @@ module.exports = {
     }
   },
   setup: (webpackConfig: Config | webpack.Configuration, pluginTasks: any) => {
-    let alias
+    let eslintExcludes: string[] = []
 
     const updateAlias = () => {
-      alias = []
+      eslintExcludes = []
       delete require.cache[require.resolve('./lib/debug')]
-      const debug = require('./lib/debug')
-      for (let item in debug.alias) {
-        const aliasPath = debug.alias[item].path
-        alias.push(path.join(aliasPath, 'src'))
+      alias = require('./lib/debug').alias
+      for (var key in alias) {
+        if (!alias[key].eslint) eslintExcludes.push(alias[key].path)
       }
     }
 
@@ -100,6 +99,13 @@ module.exports = {
         .add('./node_modules').end()
         .plugin('dynamic-alias-plugin')
         .use(DynamicAliasPlugin)
+
+      webpackConfig.module.rule('eslint').exclude.add(path => {
+        for (let item of eslintExcludes) {
+          if (path.startsWith(item)) return true
+        }
+        return false
+      })
 
       process.nextTick(() => {
         webpackConfig.module.rule('eslint')
